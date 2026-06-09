@@ -1,7 +1,8 @@
 const form = document.querySelector('.feedback-form');
 const LOCAL_STORAGE_KEY = 'feedback-form-state';
 
-const formData = {
+// Безопасное чтение данных из localStorage
+let formData = {
   email: '',
   message: '',
 };
@@ -9,22 +10,18 @@ const formData = {
 function populateForm() {
   const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
   
-  if (!savedData) return; // Если в хранилище пусто, просто выходим
+  if (!savedData || savedData === 'null') return; // Защита: если пусто, ничего не делаем
 
   try {
     const parsedData = JSON.parse(savedData);
     
-    // Проверяем, что parsedData — это объект, а не null
-    if (parsedData && typeof parsedData === 'object') {
-      formData.email = parsedData.email || '';
-      formData.message = parsedData.message || '';
+    formData.email = (parsedData.email || '').trim();
+    formData.message = (parsedData.message || '').trim();
 
-      form.elements.email.value = formData.email;
-      form.elements.message.value = formData.message;
-    }
+    form.elements.email.value = formData.email;
+    form.elements.message.value = formData.message;
   } catch (error) {
-    console.warn("Ошибка чтения хранилища, очищаем его:", error);
-    localStorage.removeItem(LOCAL_STORAGE_KEY); // Если JSON битый, лучше удалить его совсем
+    console.error('Error parsing JSON from localStorage:', error);
   }
 }
 
